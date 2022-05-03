@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Rights {
+  id                 Int                  @id @default(autoincrement())
+  code               String?              @db.VarChar(20)
+  label              String?              @db.VarChar(50)
+  userRolePrivileges UserRolePrivileges[]
+}
+
+model UserRole {
+  id                 Int                  @id @default(autoincrement())
+  label              String?              @db.VarChar(80)
+  userRolePrivileges UserRolePrivileges[]
+  users              Users[]
+}
+
+model UserRolePrivileges {
+  id         Int       @id @default(autoincrement())
+  userRoleId Int? @map("userroleid")
+  rightid    Int?
+  rights     Rights?   @relation(fields: [rightid], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "rights_fk")
+  userRole   UserRole? @relation(fields: [userRoleId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_role_fk")
+	@@map("userroleprivileges")
+}
+
+model Users {
+  id          Int       @id @default(autoincrement())
+  name        String?   @db.VarChar(40)
+  firstName   String?   @db.VarChar(80) @map("firstname")
+  dateOfBirth DateTime? @db.Date @map("dateofbirth")
+  login       String?   @db.VarChar(15)
+  password    String?   @db.VarChar(100)
+  userRoleId  Int? @map("userroleid")
+  userRole    UserRole? @relation(fields: [userRoleId], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "user_user_role_fk")
+	@@map("users")
+}
